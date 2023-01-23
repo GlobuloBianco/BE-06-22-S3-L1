@@ -1,0 +1,90 @@
+//esercizio 1 sul pgAdmin4
+
+//vari import
+INSERT INTO blabla(Constructor)
+VALUES (valori)
+-------------------
+//estrarre il nome e il cognome dei clienti nati nel 1982
+
+SELECT "Nome","Cognome"
+FROM public."Clienti"
+WHERE EXTRACT(YEAR FROM "DataNascita") = 1982;
+-------------------
+//estrare il numero delle fatture con iva al 20%
+
+SELECT "NumeroFattura"
+FROM public."Fatture"
+WHERE "Iva" = 0.22;
+-------------------
+//﻿Riportare il numero di fatture e la somma dei relativi importi divisi per anno di fatturazione
+
+SELECT EXTRACT(YEAR FROM "DataFattura") as Anno, Count(*) as NumeroFatture, Sum("Importo") as TotaleImporto
+FROM public."Fatture"
+Group by Anno;
+-------------------
+//Estrarre i prodotti attivati nel 2017 e che sono in produzione oppure in commercio
+
+SELECT *
+FROM public."Prodotti"
+WHERE ("InProduzione" = true and EXTRACT(year from "DataAttivazione") = 2017)
+OR ("InCommercio" = true and EXTRACT(year from "DataAttivazione") = 2017);
+
+//migliorato e ridotto
+
+SELECT *
+FROM public."Prodotti"
+WHERE ("InProduzione" = true OR "InCommercio" = true) AND EXTRACT(year from "DataAttivazione") = 2017
+-------------------
+//Considerando solo le fatture con iva al 20% estrarre il num delle fatture ogni anno
+
+SELECT *
+FROM public."Fatture"
+WHERE ("Iva" = 0.2) AND EXTRACT(YEAR FROM "DataFattura") = 2022
+
+SELECT *
+FROM public."Fatture"
+WHERE ("Iva" = 0.2) AND EXTRACT(YEAR FROM "DataFattura") = 2023
+-------------------
+// estrarre gli anni in cui sono state registrate piu di 2 fatture con tipologia A
+
+SELECT EXTRACT(YEAR FROM "DataFattura") as Anno,  COUNT(*) as QtyFatture
+FROM public."Fatture"
+WHERE "Tipologia" = 'A'	
+GROUP BY Anno
+HAVING COUNT(*) >= 2
+-------------------
+//importare l'elenco delle fatture (numero, importo, iva e data) con in aggiunta il nome del fornitore
+
+SELECT fatture."NumeroFattura",fatture."Importo",fatture."Iva",fatture."DataFattura",fornitori."Denominazione"
+FROM public."Fatture" fatture JOIN public."Fornitori" fornitori
+ON fatture."NumeroFornitore" = fornitori."NumeroFornitore"
+
+//più leggibile
+
+SELECT x."NumeroFattura", x."Importo", x."Iva", x."DataFattura", y."Denominazione"
+FROM public."Fatture" x
+JOIN public."Fornitori" y
+ON x."NumeroFornitore" = y."NumeroFornitore"
+-------------------
+//estrarre il totale degli importi delle fatture divisi per residenza dei clienti
+
+SELECT  SUM ("Importo") AS IMPORTOTOTALE,"RegioneResidenza" AS REGIONE
+FROM public."Fatture" Fatture
+INNER JOIN public."Clienti" Clienti
+ON Fatture."IdCliente"= Clienti."NumeroCliente"
+GROUP BY REGIONE
+-------------------
+//Estrarre il numero dei clienti nati nel 1980 che hanno almeno una fattura superiore a 50 euro
+
+SELECT COUNT(*) AS TotClienti
+FROM public."Clienti" 
+JOIN public."Fatture" 
+ON "IdCliente" = "NumeroCliente"
+WHERE EXTRACT (YEAR FROM "DataNascita") = 1980 and "Importo" >= 50	
+-------------------
+//Estrarre una colonna di nome "Denominazione" contenente il nome, seguito da un carattere "-", seguito dal cognome, per i soli clienti residenti nella regione Lombardia
+
+SELECT CONCAT("Nome", '-', "Cognome") as Denominazione
+FROM public."Clienti"
+WHERE "RegioneResidenza" = 'Lombardia'
+-------------------
